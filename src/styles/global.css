@@ -1,0 +1,36 @@
+@font-face {
+  font-family: 'Pretendard';
+  src: url('../fonts/Pretendard-Regular.otf') format('otf');
+  font-weight: normal;
+  font-style: normal;
+}
+
+::selection {
+  background-color: #B9FF66; /* 배경색 */
+  color: #191A23; /* 텍스트 색상 */
+}
+
+/* Firefox 브라우저를 위한 설정 */
+::-moz-selection {
+  background-color: #B9FF66;
+  color: #191A23;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Pretendard', sans-serif;
+  background: #fff;
+  line-height: 1.6;
+  padding-bottom: 60px; /* Footer의 높이만큼 여백 추가 */
+}
+
+.App {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}

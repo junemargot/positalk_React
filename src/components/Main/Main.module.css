@@ -1,0 +1,92 @@
+.main {
+  max-width: 1200px;
+  min-height: 100vh;
+  margin: 0 auto;
+  padding: 120px 2rem 0;
+  display: flex;
+  align-items: flex-start;
+}
+
+.content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.textContent {
+  flex: 1;
+  padding-right: 2rem;
+}
+
+.imageContent {
+  flex: 1;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.title {
+  color: #191A23;
+  margin-bottom: 1rem;
+  font-size: 3.2rem;
+  font-weight: 600;
+  line-height: 1.2; /* 줄 간격을 좁힘 */
+}
+
+.main p {
+  color: #666;
+  line-height: 1.6;
+}
+
+.linkButton {
+  display: inline-block;
+  text-decoration: none;
+}
+
+.experienceButton {
+  display: inline-block;
+  margin-top: 3rem;
+  padding: 1.1rem 2.1rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #fff;
+  background-color: #191A23;
+  border: none;
+  border-radius: 14px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  text-decoration: none;
+}
+
+.experienceButton:hover {
+  background-color: #B9FF66;
+  color: #191A23;
+  text-decoration: none;
+}
+
+
+.imageContent img {
+  max-width: 100%;
+  height: auto;
+}
+
+@media (max-width: 768px) {
+  .content {
+    flex-direction: column;
+  }
+
+  .textContent, .imageContent {
+    width: 100%;
+    padding-right: 0;
+    text-align: center;
+  }
+
+  .imageContent {
+    margin-top: 2rem;
+    justify-content: center;
+  }
+
+  .title {
+    font-size: 2.5rem; /* 모바일에서 폰트 크기 조정 */
+  }
+}
