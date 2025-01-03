@@ -10,6 +10,7 @@ function Transform() {
   const [showCopyMessage, setShowCopyMessage] = useState(false);
   const [isLoading, setIsLoading] = useState(false);  // 로딩 상태 추가
   const [isPlaying, setIsPlaying] = useState(false);
+  const [selectedModel, setSelectedModel] = useState('openai'); // 기본값을 'openai'로 설정
 
   // 변환하기 함수 추가
   const handleTransform = async () => {
@@ -30,11 +31,13 @@ function Transform() {
     setIsLoading(false);
   };
 
+  // text input area reset
   const handleReset = () => {
     setInputText('');
     setOutputText('');  // 출력도 초기화
   };
 
+  // output text copy
   const handleCopy = async () => {
     try {
       await navigator.clipboard.writeText(outputText);
@@ -98,54 +101,41 @@ function Transform() {
               </button>
             )}
           </div>
-          <button 
-            className={styles.transformButton} 
-            onClick={handleTransform}
-            disabled={isLoading || !inputText.trim()}
-          >
+          <button className={styles.transformButton} onClick={handleTransform} disabled={isLoading || !inputText.trim()}>
             {isLoading ? '변환 중...' : '변환하기'}
           </button>
         </div>
-        
         <div className={styles.rightSection}>
-          <div className={styles.selectWrapper}>
-            <select className={styles.styleSelect}>
-              <option value="formal">격식체</option>
-              <option value="casual">친근체</option>
-              <option value="polite">공손체</option>
-              <option value="cute">애교체</option>
-            </select>
+        <div className={styles.selectWrapper}>
+          <select className={styles.styleSelect}>
+            <option value="formal">격식체</option>
+            <option value="casual">친근체</option>
+            <option value="polite">공손체</option>
+            <option value="cute">애교체</option>
+          </select>
+          <div className={styles.modelButtons}>
+            <button className={`${styles.modelButton} ${selectedModel === 'openai' ? styles.active : ''}`} onClick={() => setSelectedModel('openai')}>OpenAI</button>
+            <button className={`${styles.modelButton} ${selectedModel === 'llm' ? styles.active : ''}`} onClick={() => setSelectedModel('llm')}>LLM</button>
           </div>
-          <textarea 
-            className={styles.outputArea} 
-            value={outputText}
-            readOnly={true}
-          ></textarea>
-          <div className={styles.buttonGroup}>
-            <button 
-              className={styles.soundButton}
-              onClick={handlePlaySound}
-              disabled={!outputText || isPlaying}
-            >
-              <FontAwesomeIcon icon={faVolumeHigh} />
-              <span className={styles.srOnly}>
-                {isPlaying ? '재생 중...' : '소리 재생'}
-              </span>
+        </div>
+        <textarea className={styles.outputArea} value={outputText} readOnly={true}></textarea>
+        <div className={styles.buttonGroup}>
+          <button className={styles.soundButton} onClick={handlePlaySound} disabled={!outputText || isPlaying}>
+            <FontAwesomeIcon icon={faVolumeHigh} />
+            <span className={styles.srOnly}>
+              {isPlaying ? '재생 중...' : '소리 재생'}
+            </span>
+          </button>
+          <div className={styles.copyButtonWrapper}>
+            <button className={styles.copyButton} onClick={handleCopy} disabled={!outputText}>
+              <FontAwesomeIcon icon={faCopy} />
+              <span className={styles.srOnly}>복사하기</span>
             </button>
-            <div className={styles.copyButtonWrapper}>
-              <button 
-                className={styles.copyButton} 
-                onClick={handleCopy}
-                disabled={!outputText}
-              >
-                <FontAwesomeIcon icon={faCopy} />
-                <span className={styles.srOnly}>복사하기</span>
-              </button>
-              {showCopyMessage && (
-                <div className={styles.copyMessage}>복사되었습니다</div>
-              )}
-            </div>
+            {showCopyMessage && (
+              <div className={styles.copyMessage}>복사되었습니다</div>
+            )}
           </div>
+        </div>
         </div>
       </div>
     </div>

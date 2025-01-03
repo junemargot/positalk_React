@@ -40,9 +40,40 @@
   color: #191A23;
 }
 
-.selectWrapper {
+.modelButtons {
+  display: flex;
+  gap: 8px;
+  height: 100%;
+  margin-top: 3px;
+}
+
+.modelButton {
   height: 28px;
-  margin-bottom: 10px;
+  padding: 0 12px;
+  border: 1px solid #191A23;
+  border-radius: 10px;
+  background: transparent;
+  color: #191A23;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.modelButton:hover {
+  background: #f5f5f5;
+}
+
+.modelButton.active {
+  background: #191A23;
+  color: white;
+}
+
+.selectWrapper {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 32px;
+  margin-bottom: 7px;
 }
 
 .styleSelect {
