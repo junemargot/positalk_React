@@ -102,7 +102,7 @@ function Transform() {
             )}
           </div>
           <button className={styles.transformButton} onClick={handleTransform} disabled={isLoading || !inputText.trim()}>
-            {isLoading ? '변환 중...' : '변환하기'}
+            {isLoading ? '변환 중..' : '변환하기'}
           </button>
         </div>
         <div className={styles.rightSection}>
@@ -120,14 +120,14 @@ function Transform() {
         </div>
         <textarea className={styles.outputArea} value={outputText} readOnly={true}></textarea>
         <div className={styles.buttonGroup}>
-          <button className={styles.soundButton} onClick={handlePlaySound} disabled={!outputText || isPlaying}>
+          <button title="사운드 재생" className={styles.soundButton} onClick={handlePlaySound} disabled={!outputText || isPlaying}>
             <FontAwesomeIcon icon={faVolumeHigh} />
             <span className={styles.srOnly}>
-              {isPlaying ? '재생 중...' : '소리 재생'}
+              {isPlaying ? '재생 중..' : '소리 재생'}
             </span>
           </button>
           <div className={styles.copyButtonWrapper}>
-            <button className={styles.copyButton} onClick={handleCopy} disabled={!outputText}>
+            <button title="클립보드 복사" className={styles.copyButton} onClick={handleCopy} disabled={!outputText}>
               <FontAwesomeIcon icon={faCopy} />
               <span className={styles.srOnly}>복사하기</span>
             </button>
