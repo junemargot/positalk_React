@@ -1,22 +1,41 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import styles from './Transform.module.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCopy, faVolumeHigh, faXmark } from '@fortawesome/free-solid-svg-icons';
+import { faCopy, faVolumeHigh, faXmark, faHistory } from '@fortawesome/free-solid-svg-icons';
+import History from '../History/History';
 
-function Transform() {
+function Transform({ histories, setHistories }) {
+  const navigate = useNavigate();
   const [inputText, setInputText] = useState('');
   const [outputText, setOutputText] = useState('');
   const [showCopyMessage, setShowCopyMessage] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [modelType, setModelType] = useState('openai'); // 기본값은 openai
+  const [showHistory, setShowHistory] = useState(false);  // 모달 표시 상태 추가
+
+  // 모델별 스타일 옵션 정의 추가
+  const styleOptions = {
+    openai: [
+      { value: 'formal', label: '격식체' },
+      { value: 'casual', label: '친근체' },
+      { value: 'polite', label: '공손체' },
+      { value: 'cute', label: '애교체' }
+    ],
+    huggingface: [
+      { value: 'cute', label: '애교체' }
+    ]
+  };
 
   // 변환하기 함수 추가
   const handleTransform = async () => {
     if (!inputText.trim()) return;
     
     setIsLoading(true);
+    const startTime = Date.now();
+    
     try {
       const response = await axios.post('http://localhost:8000/api/chat', {
         message: inputText,
@@ -24,6 +43,17 @@ function Transform() {
         model: modelType
       });
       
+      const duration = Date.now() - startTime;
+      const newHistory = {
+        inputText,
+        outputText: response.data.response,
+        model: modelType,
+        style: document.querySelector(`.${styles.styleSelect}`).value,
+        timestamp: new Date().toLocaleString(),
+        duration
+      };
+      
+      setHistories(prev => [newHistory, ...prev]);
       setOutputText(response.data.response);
     } catch (error) {
       console.error('Error:', error);
@@ -39,16 +69,10 @@ function Transform() {
   };
 
   // output text copy
-  const handleCopy = async () => {
-    try {
-      await navigator.clipboard.writeText(outputText);
-      setShowCopyMessage(true);
-      setTimeout(() => {
-        setShowCopyMessage(false);
-      }, 2000);
-    } catch (err) {
-      console.error('복사에 실패했습니다:', err);
-    }
+  const handleCopy = (text) => {
+    navigator.clipboard.writeText(text);
+    setShowCopyMessage(true);
+    setTimeout(() => setShowCopyMessage(false), 1000);
   };
 
   // handlePlaySound 함수 수정
@@ -84,11 +108,53 @@ function Transform() {
     }
   };
 
+  // 히스토리 페이지로 이동하는 함수
+  const handleHistoryClick = () => {
+    navigate('/history');
+  };
+
+  // 음성 재생 함수 추가
+  const handleSpeak = async (text, style) => {
+    try {
+      setIsPlaying(true);
+      const response = await fetch('http://localhost:8000/api/tts', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          text: text,
+          voice: { style }
+        }),
+      });
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const audio = new Audio(url);
+      audio.play();
+      audio.onended = () => {
+        setIsPlaying(false);
+        window.URL.revokeObjectURL(url);
+      };
+    } catch (error) {
+      console.error('Error:', error);
+      setIsPlaying(false);
+    }
+  };
+
   return (
     <div className={styles.container}>
       <div className={styles.transformBox}>
         <div className={styles.leftSection}>
-          <h3>원문</h3>
+          <div className={styles.headerSection}>
+            <h3>원문</h3>
+            <button 
+              className={styles.historyButton}
+              onClick={() => setShowHistory(true)}  // 모달 열기
+            >
+              <FontAwesomeIcon icon={faHistory} />
+              <span>변환 기록</span>
+            </button>
+          </div>
           <div className={styles.inputWrapper}>
             <textarea 
               className={styles.inputArea} 
@@ -109,10 +175,11 @@ function Transform() {
         <div className={styles.rightSection}>
         <div className={styles.selectWrapper}>
           <select className={styles.styleSelect}>
-            <option value="formal">격식체</option>
-            <option value="casual">친근체</option>
-            <option value="polite">공손체</option>
-            <option value="cute">애교체</option>
+            {styleOptions[modelType].map(option => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
           </select>
           <div className={styles.modelButtons}>
             <button 
@@ -138,7 +205,7 @@ function Transform() {
             </span>
           </button>
           <div className={styles.copyButtonWrapper}>
-            <button title="클립보드 복사" className={styles.copyButton} onClick={handleCopy} disabled={!outputText}>
+            <button title="클립보드 복사" className={styles.copyButton} onClick={() => handleCopy(outputText)} disabled={!outputText}>
               <FontAwesomeIcon icon={faCopy} />
               <span className={styles.srOnly}>복사하기</span>
             </button>
@@ -149,6 +216,14 @@ function Transform() {
         </div>
         </div>
       </div>
+      {showHistory && (
+        <History
+          histories={histories}
+          onSpeak={handleSpeak}
+          onCopy={handleCopy}
+          onClose={() => setShowHistory(false)}
+        />
+      )}
     </div>
   );
 }

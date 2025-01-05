@@ -249,3 +249,33 @@
     width: 100%;
   }
 }
+
+.headerSection {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 7px;
+}
+
+.historyButton {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border: 1px solid #191A23;
+  border-radius: 8px;
+  background: transparent;
+  color: #191A23;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.historyButton:hover {
+  background: #191A23;
+  color: white;
+}
+
+.historyButton svg {
+  font-size: 14px;
+}
