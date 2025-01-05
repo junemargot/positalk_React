@@ -1,16 +1,16 @@
 import React, { useState } from 'react';
-import axios from 'axios';  // axios import 추가
+import axios from 'axios';
 import styles from './Transform.module.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCopy, faVolumeHigh, faXmark } from '@fortawesome/free-solid-svg-icons';
 
 function Transform() {
   const [inputText, setInputText] = useState('');
-  const [outputText, setOutputText] = useState('');  // 출력 텍스트 상태 추가
+  const [outputText, setOutputText] = useState('');
   const [showCopyMessage, setShowCopyMessage] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);  // 로딩 상태 추가
+  const [isLoading, setIsLoading] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [selectedModel, setSelectedModel] = useState('openai'); // 기본값을 'openai'로 설정
+  const [modelType, setModelType] = useState('openai'); // 기본값은 openai
 
   // 변환하기 함수 추가
   const handleTransform = async () => {
@@ -20,7 +20,8 @@ function Transform() {
     try {
       const response = await axios.post('http://localhost:8000/api/chat', {
         message: inputText,
-        style: document.querySelector(`.${styles.styleSelect}`).value
+        style: document.querySelector(`.${styles.styleSelect}`).value,
+        model: modelType
       });
       
       setOutputText(response.data.response);
@@ -114,8 +115,18 @@ function Transform() {
             <option value="cute">애교체</option>
           </select>
           <div className={styles.modelButtons}>
-            <button className={`${styles.modelButton} ${selectedModel === 'openai' ? styles.active : ''}`} onClick={() => setSelectedModel('openai')}>OpenAI</button>
-            <button className={`${styles.modelButton} ${selectedModel === 'llm' ? styles.active : ''}`} onClick={() => setSelectedModel('llm')}>LLM</button>
+            <button 
+              className={`${styles.modelButton} ${modelType === 'openai' ? styles.active : ''}`}
+              onClick={() => setModelType('openai')}
+            >
+              OpenAI
+            </button>
+            <button 
+              className={`${styles.modelButton} ${modelType === 'huggingface' ? styles.active : ''}`}
+              onClick={() => setModelType('huggingface')}
+            >
+              polyglot-ko-5.8b
+            </button>
           </div>
         </div>
         <textarea className={styles.outputArea} value={outputText} readOnly={true}></textarea>
