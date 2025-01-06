@@ -82,14 +82,13 @@ function Transform({ histories, setHistories }) {
     const startTime = Date.now();
     
     try {
-        // 요청 데이터 로깅 추가
         const requestData = {
             message: inputText,
             style: document.querySelector(`.${styles.styleSelect}`).value,
             model: modelType,
-            subModel: modelType === 'openai-gpt' ? selectedSubModel : undefined
+            ...(modelType === 'openai-gpt' && { subModel: selectedSubModel })
         };
-        console.log('요청 데이터:', requestData);  // 디버깅용
+        console.log('요청 데이터:', requestData);
 
         const response = await axios.post('http://localhost:8000/api/chat', requestData);
         
@@ -106,7 +105,7 @@ function Transform({ histories, setHistories }) {
         setHistories(prev => [newHistory, ...prev]);
         setOutputText(response.data.response);
     } catch (error) {
-        console.error('상세 에러:', error.response?.data);  // 서버 에러 메시지 출력
+        console.error('상세 에러:', error.response?.data);
         setOutputText('오류가 발생했습니다. 다시 시도해주세요.');
     }
     setIsLoading(false);
