@@ -16,6 +16,9 @@ function Transform({ histories, setHistories }) {
   const [modelType, setModelType] = useState('openai-gpt');
   const [selectedModel, setSelectedModel] = useState('');
   const [showHistory, setShowHistory] = useState(false);  // 모달 표시 상태 추가
+  const [showSubModels, setShowSubModels] = useState(false);
+  const [selectedSubModel, setSelectedSubModel] = useState('GPT-3.5 Turbo');
+  const [displayModel, setDisplayModel] = useState('OpenAI GPT'); // 표시용 모델명
 
   useEffect(() => {
     setSelectedModel('');  // 초기에 "클라우드 AI" 표시
@@ -49,6 +52,29 @@ function Transform({ histories, setHistories }) {
     { value: 'gemini', label: 'Gemini' }
   ];
 
+  // OpenAI 서브 모델 옵션
+  const openaiSubModels = [
+    { value: 'gpt-3.5-turbo', label: 'gpt-3.5-turbo' },
+    { value: 'gpt-4o-mini', label: 'gpt-4o-mini' }
+  ];
+
+  // 모델 변경 핸들러 수정
+  const handleModelChange = (e) => {
+    const newModel = e.target.value;
+    setModelType(newModel);
+    if (newModel === 'openai-gpt') {
+      setDisplayModel(`OpenAI GPT (${selectedSubModel})`);
+    } else {
+      setDisplayModel(modelOptions.find(opt => opt.value === newModel)?.label || '');
+    }
+  };
+
+  // 서브 모델 선택 핸들러
+  const handleSubModelSelect = (model) => {
+    setSelectedSubModel(model.label);
+    setDisplayModel(`OpenAI GPT (${model.label})`);
+  };
+
   // 변환하기 함수 추가
   const handleTransform = async () => {
     if (!inputText.trim()) return;
@@ -57,27 +83,32 @@ function Transform({ histories, setHistories }) {
     const startTime = Date.now();
     
     try {
-      const response = await axios.post('http://localhost:8000/api/chat', {
-        message: inputText,
-        style: document.querySelector(`.${styles.styleSelect}`).value,
-        model: modelType
-      });
-      
-      const duration = Date.now() - startTime;
-      const newHistory = {
-        inputText,
-        outputText: response.data.response,
-        model: modelType,
-        style: document.querySelector(`.${styles.styleSelect}`).value,
-        timestamp: new Date().toLocaleString(),
-        duration
-      };
-      
-      setHistories(prev => [newHistory, ...prev]);
-      setOutputText(response.data.response);
+        // 요청 데이터 로깅 추가
+        const requestData = {
+            message: inputText,
+            style: document.querySelector(`.${styles.styleSelect}`).value,
+            model: modelType,
+            subModel: modelType === 'openai-gpt' ? selectedSubModel : undefined
+        };
+        console.log('요청 데이터:', requestData);  // 디버깅용
+
+        const response = await axios.post('http://localhost:8000/api/chat', requestData);
+        
+        const duration = Date.now() - startTime;
+        const newHistory = {
+            inputText,
+            outputText: response.data.response,
+            model: modelType,
+            style: document.querySelector(`.${styles.styleSelect}`).value,
+            timestamp: new Date().toLocaleString(),
+            duration
+        };
+        
+        setHistories(prev => [newHistory, ...prev]);
+        setOutputText(response.data.response);
     } catch (error) {
-      console.error('Error:', error);
-      setOutputText('오류가 발생했습니다. 다시 시도해주세요.');
+        console.error('상세 에러:', error.response?.data);  // 서버 에러 메시지 출력
+        setOutputText('오류가 발생했습니다. 다시 시도해주세요.');
     }
     setIsLoading(false);
   };
@@ -198,7 +229,6 @@ function Transform({ histories, setHistories }) {
         </div>
         <div className={styles.rightSection}>
         <div className={styles.selectWrapper}>
-          
           <select className={styles.styleSelect} defaultValue="">
             <option value="" disabled>문체</option>
             {styleOptions[modelType].map(option => (
@@ -207,19 +237,36 @@ function Transform({ histories, setHistories }) {
               </option>
             ))}
           </select>
-          <select 
-            className={styles.styleSelect}
-            value={modelType}
-            onChange={(e) => setModelType(e.target.value)}
-            defaultValue=""
-          >
-            <option value="" disabled>클라우드 AI</option>
-            {modelOptions.map(option => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
+          
+          <div className={styles.modelSelectWrapper}>
+            <select 
+              className={styles.styleSelect}
+              value={modelType}
+              onChange={handleModelChange}
+            >
+              <option value="" disabled>클라우드 AI</option>
+              {modelOptions.map(option => (
+                <option key={option.value} value={option.value}>
+                  {displayModel && modelType === option.value ? displayModel : option.label}
+                </option>
+              ))}
+            </select>
+            
+            {modelType === 'openai-gpt' && (
+              <div className={styles.subModelSelector}>
+                {openaiSubModels.map(model => (
+                  <div
+                    key={model.value}
+                    className={`${styles.subModelOption} ${selectedSubModel === model.label ? styles.selected : ''}`}
+                    onClick={() => handleSubModelSelect(model)}
+                  >
+                    {model.label}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+          
           <button 
             className={`${styles.modelButton} ${modelType === 'huggingface' ? styles.active : ''}`}
             onClick={() => setModelType('huggingface')}
@@ -227,6 +274,7 @@ function Transform({ histories, setHistories }) {
             polyglot-ko-5.8b
           </button>
         </div>
+        
         <textarea className={styles.outputArea} value={outputText} readOnly={true}></textarea>
         <div className={styles.buttonGroup}>
           <button title="사운드 재생" className={styles.soundButton} onClick={handlePlaySound} disabled={!outputText || isPlaying}>
