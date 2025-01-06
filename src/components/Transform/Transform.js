@@ -13,68 +13,51 @@ function Transform({ histories, setHistories }) {
   const [showCopyMessage, setShowCopyMessage] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [modelType, setModelType] = useState('openai-gpt');
+  const [modelType, setModelType] = useState('');
   const [selectedModel, setSelectedModel] = useState('');
-  const [showHistory, setShowHistory] = useState(false);  // 모달 표시 상태 추가
-  const [selectedSubModel, setSelectedSubModel] = useState('GPT-3.5 Turbo');
-  const [displayModel, setDisplayModel] = useState('OpenAI GPT'); // 표시용 모델명
+  const [showHistory, setShowHistory] = useState(false);
+  const [displayModel, setDisplayModel] = useState('');
 
   useEffect(() => {
-    setSelectedModel('');  // 초기에 "클라우드 AI" 표시
+    setSelectedModel('');
   }, []);
 
-  // 모델별 스타일 옵션 정의 수정
-  const styleOptions = {
-    'openai-gpt': [
-      { value: 'formal', label: '격식체' },
-      { value: 'casual', label: '친근체' },
-      { value: 'polite', label: '공손체' },
-      { value: 'cute', label: '애교체' }
-    ],
-    'gemini': [
-      { value: 'formal', label: '격식체' },
-      { value: 'casual', label: '친근체' },
-      { value: 'polite', label: '공손체' },
-      { value: 'cute', label: '애교체' }
-    ],
-    'huggingface': [
-      { value: 'formal', label: '격식체' },
-      { value: 'casual', label: '친근체' },
-      { value: 'polite', label: '공손체' },
-      { value: 'cute', label: '애교체' }
-    ]
-  };
+  const styleOptions = [
+    { value: 'formal', label: '격식체' },
+    { value: 'casual', label: '친근체' },
+    { value: 'polite', label: '공손체' },
+    { value: 'cute', label: '애교체' }
+  ];
 
-  // 모델 옵션 추가
   const modelOptions = [
-    { value: 'openai-gpt', label: 'OpenAI GPT' },
+    { value: 'gpt-3.5-turbo', label: 'GPT-3.5 Turbo' },
+    { value: 'gpt-4o-mini', label: 'GPT-4 Mini' },
     { value: 'gemini', label: 'Gemini' }
   ];
 
-  // OpenAI 서브 모델 옵션
-  const openaiSubModels = [
-    { value: 'gpt-3.5-turbo', label: 'gpt-3.5-turbo' },
-    { value: 'gpt-4o-mini', label: 'gpt-4o-mini' }
+  const localAIOptions = [
+    { value: 'polyglot-ko', label: 'Polyglot-KO 5.8B' },
+    { value: 'kogpt2', label: 'KoGPT2' },
+    { value: 'qwen18b', label: 'Qwen1.5 1.8B' },
+    { value: 'qwen15b', label: 'Qwen2.5 1.5B' },
+    { value: 'qwen3b', label: 'Qwen2.5 3B' },
+    { value: 'qwen7b', label: 'Qwen2.5 7B' }
+    
   ];
 
-  // 모델 변경 핸들러 수정
   const handleModelChange = (e) => {
     const newModel = e.target.value;
     setModelType(newModel);
-    if (newModel === 'openai-gpt') {
-      setDisplayModel(`OpenAI GPT (${selectedSubModel})`);
-    } else {
-      setDisplayModel(modelOptions.find(opt => opt.value === newModel)?.label || '');
+    
+    const isCloudAI = modelOptions.some(opt => opt.value === newModel);
+    const isLocalAI = localAIOptions.some(opt => opt.value === newModel);
+    
+    if (isCloudAI || isLocalAI) {
+      setDisplayModel(modelOptions.find(opt => opt.value === newModel)?.label || 
+                     localAIOptions.find(opt => opt.value === newModel)?.label || '');
     }
   };
 
-  // 서브 모델 선택 핸들러
-  const handleSubModelSelect = (model) => {
-    setSelectedSubModel(model.label);
-    setDisplayModel(`OpenAI GPT (${model.label})`);
-  };
-
-  // 변환하기 함수 추가
   const handleTransform = async () => {
     if (!inputText.trim()) return;
     
@@ -82,49 +65,46 @@ function Transform({ histories, setHistories }) {
     const startTime = Date.now();
     
     try {
-        const requestData = {
-            message: inputText,
-            style: document.querySelector(`.${styles.styleSelect}`).value,
-            model: modelType,
-            ...(modelType === 'openai-gpt' ? { subModel: selectedSubModel } : {})
-        };
-        console.log('요청 데이터:', requestData);
+      const requestData = {
+        message: inputText,
+        style: document.querySelector(`.${styles.styleSelect}`).value,
+        model: modelType.startsWith('gpt') ? 'openai-gpt' : modelType,
+        subModel: modelType.startsWith('gpt') ? modelType : undefined
+      };
+      console.log('요청 데이터:', requestData);
 
-        const response = await axios.post('http://localhost:8000/api/chat', requestData);
-        
-        const duration = Date.now() - startTime;
-        const newHistory = {
-            inputText,
-            outputText: response.data.response,
-            model: modelType,
-            style: document.querySelector(`.${styles.styleSelect}`).value,
-            timestamp: new Date().toLocaleString(),
-            duration
-        };
-        
-        setHistories(prev => [newHistory, ...prev]);
-        setOutputText(response.data.response);
+      const response = await axios.post('http://localhost:8000/api/chat', requestData);
+      
+      const duration = Date.now() - startTime;
+      const newHistory = {
+        inputText,
+        outputText: response.data.response,
+        model: modelType,
+        style: document.querySelector(`.${styles.styleSelect}`).value,
+        timestamp: new Date().toLocaleString(),
+        duration
+      };
+      
+      setHistories(prev => [newHistory, ...prev]);
+      setOutputText(response.data.response);
     } catch (error) {
-        console.error('상세 에러:', error.response?.data);
-        setOutputText('오류가 발생했습니다. 다시 시도해주세요.');
+      console.error('상세 에러:', error.response?.data);
+      setOutputText('오류가 발생했습니다. 다시 시도해주세요.');
     }
     setIsLoading(false);
   };
 
-  // text input area reset
   const handleReset = () => {
     setInputText('');
-    setOutputText('');  // 출력도 초기화
+    setOutputText('');
   };
 
-  // output text copy
   const handleCopy = (text) => {
     navigator.clipboard.writeText(text);
     setShowCopyMessage(true);
     setTimeout(() => setShowCopyMessage(false), 1000);
   };
 
-  // handlePlaySound 함수 수정
   const handlePlaySound = async () => {
     if (!outputText || isPlaying) return;
     
@@ -134,7 +114,7 @@ function Transform({ histories, setHistories }) {
       const response = await axios.post('http://localhost:8000/api/tts', {
         text: outputText,
         voice: {
-          style: selectedStyle  // 단순히 스타일 정보만 전달
+          style: selectedStyle
         }
       }, {
         responseType: 'arraybuffer'
@@ -157,12 +137,10 @@ function Transform({ histories, setHistories }) {
     }
   };
 
-  // 히스토리 페이지로 이동하는 함수
   const handleHistoryClick = () => {
     navigate('/history');
   };
 
-  // 음성 재생 함수 추가
   const handleSpeak = async (text, style) => {
     try {
       setIsPlaying(true);
@@ -198,7 +176,7 @@ function Transform({ histories, setHistories }) {
             <h3>원문</h3>
             <button 
               className={styles.historyButton}
-              onClick={() => setShowHistory(true)}  // 모달 열기
+              onClick={() => setShowHistory(true)}
             >
               <FontAwesomeIcon icon={faHistory} />
               <span>변환 기록</span>
@@ -229,7 +207,7 @@ function Transform({ histories, setHistories }) {
         <div className={styles.selectWrapper}>
           <select className={styles.styleSelect} defaultValue="">
             <option value="" disabled>문체</option>
-            {styleOptions[modelType].map(option => (
+            {styleOptions.map(option => (
               <option key={option.value} value={option.value}>
                 {option.label}
               </option>
@@ -239,38 +217,30 @@ function Transform({ histories, setHistories }) {
           <div className={styles.modelSelectWrapper}>
             <select 
               className={styles.styleSelect}
-              value={modelType}
+              value={modelOptions.some(opt => opt.value === modelType) ? modelType : ""}
               onChange={handleModelChange}
             >
               <option value="" disabled>클라우드 AI</option>
               {modelOptions.map(option => (
                 <option key={option.value} value={option.value}>
-                  {displayModel && modelType === option.value ? displayModel : option.label}
+                  {option.label}
                 </option>
               ))}
             </select>
-            
-            {modelType === 'openai-gpt' && (
-              <div className={styles.subModelSelector}>
-                {openaiSubModels.map(model => (
-                  <div
-                    key={model.value}
-                    className={`${styles.subModelOption} ${selectedSubModel === model.label ? styles.selected : ''}`}
-                    onClick={() => handleSubModelSelect(model)}
-                  >
-                    {model.label}
-                  </div>
-                ))}
-              </div>
-            )}
+
+            <select 
+              className={styles.styleSelect}
+              value={localAIOptions.some(opt => opt.value === modelType) ? modelType : ""}
+              onChange={handleModelChange}
+            >
+              <option value="" disabled>로컬 AI</option>
+              {localAIOptions.map(option => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
           </div>
-          
-          <button 
-            className={`${styles.modelButton} ${modelType === 'huggingface' ? styles.active : ''}`}
-            onClick={() => setModelType('huggingface')}
-          >
-            polyglot-ko-5.8b
-          </button>
         </div>
         
         <textarea className={styles.outputArea} value={outputText} readOnly={true}></textarea>
