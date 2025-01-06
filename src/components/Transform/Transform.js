@@ -36,6 +36,9 @@ function Transform({ histories, setHistories }) {
       { value: 'cute', label: '애교체' }
     ],
     'huggingface': [
+      { value: 'formal', label: '격식체' },
+      { value: 'casual', label: '친근체' },
+      { value: 'polite', label: '공손체' },
       { value: 'cute', label: '애교체' }
     ]
   };
