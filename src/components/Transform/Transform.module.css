@@ -77,12 +77,12 @@
 }
 
 .styleSelect {
-  width: 130px;
+  min-width: 130px;
   padding: 5px 12px;
-  border: 1px solid #E5E5E5;
+  border: 1px solid #191A23;
   border-radius: 10px;
   background-color: #fff;
-  font-size: 16px;
+  font-size: 14px;
   color: #191A23;
   cursor: pointer;
   outline: none;
@@ -92,10 +92,19 @@
   background-position: right 10px center;
   background-size: 16px;
   padding-right: 35px;
+  height: 28px;
 }
 
 .styleSelect:focus {
-  border-color: #191A23;
+  border-color: #B9FF66;
+}
+
+.styleSelect option {
+  padding: 8px;
+}
+
+.styleSelect option:first-child {
+  color: #666;
 }
 
 .inputWrapper {
@@ -254,6 +263,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  height: 32px;
   margin-bottom: 7px;
 }
 
@@ -279,3 +289,13 @@
 .historyButton svg {
   font-size: 14px;
 }
+
+.modelSelect {
+  display: none;
+}
+
+.modelSelect:focus {
+  outline: none;
+  border-color: #007bff;
+}
+

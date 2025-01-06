@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import styles from './Transform.module.css';
@@ -13,21 +13,38 @@ function Transform({ histories, setHistories }) {
   const [showCopyMessage, setShowCopyMessage] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [modelType, setModelType] = useState('openai'); // 기본값은 openai
+  const [modelType, setModelType] = useState('openai-gpt');
+  const [selectedModel, setSelectedModel] = useState('');
   const [showHistory, setShowHistory] = useState(false);  // 모달 표시 상태 추가
 
-  // 모델별 스타일 옵션 정의 추가
+  useEffect(() => {
+    setSelectedModel('');  // 초기에 "클라우드 AI" 표시
+  }, []);
+
+  // 모델별 스타일 옵션 정의 수정
   const styleOptions = {
-    openai: [
+    'openai-gpt': [
       { value: 'formal', label: '격식체' },
       { value: 'casual', label: '친근체' },
       { value: 'polite', label: '공손체' },
       { value: 'cute', label: '애교체' }
     ],
-    huggingface: [
+    'gemini': [
+      { value: 'formal', label: '격식체' },
+      { value: 'casual', label: '친근체' },
+      { value: 'polite', label: '공손체' },
+      { value: 'cute', label: '애교체' }
+    ],
+    'huggingface': [
       { value: 'cute', label: '애교체' }
     ]
   };
+
+  // 모델 옵션 추가
+  const modelOptions = [
+    { value: 'openai-gpt', label: 'OpenAI GPT' },
+    { value: 'gemini', label: 'Gemini' }
+  ];
 
   // 변환하기 함수 추가
   const handleTransform = async () => {
@@ -168,33 +185,44 @@ function Transform({ histories, setHistories }) {
               </button>
             )}
           </div>
-          <button className={styles.transformButton} onClick={handleTransform} disabled={isLoading || !inputText.trim()}>
+          <button 
+            className={styles.transformButton} 
+            onClick={handleTransform} 
+            disabled={isLoading || !inputText.trim()}
+          >
             {isLoading ? '변환 중..' : '변환하기'}
           </button>
         </div>
         <div className={styles.rightSection}>
         <div className={styles.selectWrapper}>
-          <select className={styles.styleSelect}>
+          
+          <select className={styles.styleSelect} defaultValue="">
+            <option value="" disabled>문체</option>
             {styleOptions[modelType].map(option => (
               <option key={option.value} value={option.value}>
                 {option.label}
               </option>
             ))}
           </select>
-          <div className={styles.modelButtons}>
-            <button 
-              className={`${styles.modelButton} ${modelType === 'openai' ? styles.active : ''}`}
-              onClick={() => setModelType('openai')}
-            >
-              OpenAI
-            </button>
-            <button 
-              className={`${styles.modelButton} ${modelType === 'huggingface' ? styles.active : ''}`}
-              onClick={() => setModelType('huggingface')}
-            >
-              polyglot-ko-5.8b
-            </button>
-          </div>
+          <select 
+            className={styles.styleSelect}
+            value={modelType}
+            onChange={(e) => setModelType(e.target.value)}
+            defaultValue=""
+          >
+            <option value="" disabled>클라우드 AI</option>
+            {modelOptions.map(option => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+          <button 
+            className={`${styles.modelButton} ${modelType === 'huggingface' ? styles.active : ''}`}
+            onClick={() => setModelType('huggingface')}
+          >
+            polyglot-ko-5.8b
+          </button>
         </div>
         <textarea className={styles.outputArea} value={outputText} readOnly={true}></textarea>
         <div className={styles.buttonGroup}>
