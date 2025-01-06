@@ -86,7 +86,7 @@ function Transform({ histories, setHistories }) {
             message: inputText,
             style: document.querySelector(`.${styles.styleSelect}`).value,
             model: modelType,
-            ...(modelType === 'openai-gpt' && { subModel: selectedSubModel })
+            ...(modelType === 'openai-gpt' ? { subModel: selectedSubModel } : {})
         };
         console.log('요청 데이터:', requestData);
 
