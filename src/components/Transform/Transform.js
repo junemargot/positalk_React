@@ -16,7 +16,6 @@ function Transform({ histories, setHistories }) {
   const [modelType, setModelType] = useState('openai-gpt');
   const [selectedModel, setSelectedModel] = useState('');
   const [showHistory, setShowHistory] = useState(false);  // 모달 표시 상태 추가
-  const [showSubModels, setShowSubModels] = useState(false);
   const [selectedSubModel, setSelectedSubModel] = useState('GPT-3.5 Turbo');
   const [displayModel, setDisplayModel] = useState('OpenAI GPT'); // 표시용 모델명
 
