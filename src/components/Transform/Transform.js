@@ -51,31 +51,41 @@ function Transform({ histories, setHistories }) {
   ];
 
   const handleModelChange = (e) => {
-    const newModel = e.target.value;
+    let newModel = e.target.value;
+    
+    // 9unu 모델들은 'h9'로 변경
+    if (newModel === 'formal-9unu' || newModel === 'gentle-9unu') {
+        newModel = 'h9';
+    }
+    
     setModelType(newModel);
     
+    // 모델에 따른 스타일 옵션 설정
     if (newModel === 'heegyu') {
         setAvailableStyles(allStyleOptions.filter(style => 
             ['casual', 'cute'].includes(style.value)
         ));
-    } else if (newModel === 'gentle-9unu') {
+        setSelectedStyle('casual'); // 기본값 설정
+    } else if (e.target.value === 'gentle-9unu') {
         setAvailableStyles(allStyleOptions.filter(style => 
             style.value === 'polite'
         ));
-    } else if (newModel === 'formal-9unu') {
+        setSelectedStyle('polite'); // 기본값 설정
+    } else if (e.target.value === 'formal-9unu') {
         setAvailableStyles(allStyleOptions.filter(style => 
             style.value === 'formal'
         ));
+        setSelectedStyle('formal'); // 기본값 설정
     } else {
         setAvailableStyles(allStyleOptions);
     }
     
-    const isCloudAI = modelOptions.some(opt => opt.value === newModel);
-    const isLocalAI = localAIOptions.some(opt => opt.value === newModel);
+    const isCloudAI = modelOptions.some(opt => opt.value === e.target.value);
+    const isLocalAI = localAIOptions.some(opt => opt.value === e.target.value);
     
     if (isCloudAI || isLocalAI) {
-        setDisplayModel(modelOptions.find(opt => opt.value === newModel)?.label || 
-                     localAIOptions.find(opt => opt.value === newModel)?.label || '');
+        setDisplayModel(modelOptions.find(opt => opt.value === e.target.value)?.label || 
+                     localAIOptions.find(opt => opt.value === e.target.value)?.label || '');
     }
   };
 
