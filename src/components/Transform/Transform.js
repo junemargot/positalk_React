@@ -17,12 +17,14 @@ function Transform({ histories, setHistories }) {
   const [selectedModel, setSelectedModel] = useState('');
   const [showHistory, setShowHistory] = useState(false);
   const [displayModel, setDisplayModel] = useState('');
+  const [availableStyles, setAvailableStyles] = useState([]);
+  const [selectedStyle, setSelectedStyle] = useState('');
 
   useEffect(() => {
     setSelectedModel('');
   }, []);
 
-  const styleOptions = [
+  const allStyleOptions = [
     { value: 'formal', label: '격식체' },
     { value: 'casual', label: '친근체' },
     { value: 'polite', label: '공손체' },
@@ -41,19 +43,38 @@ function Transform({ histories, setHistories }) {
     { value: 'qwen18b', label: 'Qwen1.5 1.8B' },
     { value: 'qwen15b', label: 'Qwen2.5 1.5B' },
     { value: 'qwen3b', label: 'Qwen2.5 3B' },
-    { value: 'qwen7b', label: 'Qwen2.5 7B' }
-    
+    { value: 'qwen7b', label: 'Qwen2.5 7B' },
+    { value: 'bllossom', label: 'Llama Korean Bllossom 3B' },
+    { value: 'heegyu', label: 'Heegyu Model' },
+    { value: 'formal-9unu', label: 'Formal 9UNU' },
+    { value: 'gentle-9unu', label: 'Gentle 9UNU' }
   ];
 
   const handleModelChange = (e) => {
     const newModel = e.target.value;
     setModelType(newModel);
     
+    if (newModel === 'heegyu') {
+        setAvailableStyles(allStyleOptions.filter(style => 
+            ['casual', 'cute'].includes(style.value)
+        ));
+    } else if (newModel === 'gentle-9unu') {
+        setAvailableStyles(allStyleOptions.filter(style => 
+            style.value === 'polite'
+        ));
+    } else if (newModel === 'formal-9unu') {
+        setAvailableStyles(allStyleOptions.filter(style => 
+            style.value === 'formal'
+        ));
+    } else {
+        setAvailableStyles(allStyleOptions);
+    }
+    
     const isCloudAI = modelOptions.some(opt => opt.value === newModel);
     const isLocalAI = localAIOptions.some(opt => opt.value === newModel);
     
     if (isCloudAI || isLocalAI) {
-      setDisplayModel(modelOptions.find(opt => opt.value === newModel)?.label || 
+        setDisplayModel(modelOptions.find(opt => opt.value === newModel)?.label || 
                      localAIOptions.find(opt => opt.value === newModel)?.label || '');
     }
   };
@@ -205,9 +226,14 @@ function Transform({ histories, setHistories }) {
         </div>
         <div className={styles.rightSection}>
         <div className={styles.selectWrapper}>
-          <select className={styles.styleSelect} defaultValue="">
+          <select 
+            className={styles.styleSelect} 
+            defaultValue=""
+            value={selectedStyle}
+            onChange={(e) => setSelectedStyle(e.target.value)}
+          >
             <option value="" disabled>문체</option>
-            {styleOptions.map(option => (
+            {availableStyles.map(option => (
               <option key={option.value} value={option.value}>
                 {option.label}
               </option>
