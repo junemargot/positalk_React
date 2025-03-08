@@ -1,3 +1,12 @@
+@font-face {
+  font-family: 'Pretendard';
+  src: url('../../fonts/Pretendard-Regular.otf') format('otf');
+  font-weight: normal;
+  font-style: normal;
+}
+
+
+
 .container {
   width: 100%;
   min-height: 100vh;
@@ -15,20 +24,21 @@
   border-radius: 30px;
   padding: 40px;
   display: flex;
-  gap: 40px;
+  gap: 18px;
 }
 
 .leftSection, .rightSection {
+  /* flex: 1 1 0%; */
   flex: 1;
   display: flex;
   flex-direction: column;
 }
 
 .leftSection h3 {
-  font-size: 20px;
+  font-size: 18px;
   font-weight: 800;
   margin-left: 8px;
-  margin-top: 14px;
+  margin-top: 17px;
   margin-bottom: 7px;
   color: #191A23;
 }
@@ -70,6 +80,7 @@
 
 .selectWrapper {
   display: flex;
+  justify-content: space-between;
   align-items: center;
   gap: 10px;
   height: 32px;
@@ -120,6 +131,7 @@
 }
 
 .inputArea {
+  font-family: 'Pretendard';
   width: 100%;
   height: 400px;
   /* padding: 20px; */
@@ -292,7 +304,7 @@
 .modelSelectWrapper {
   display: flex;
   align-items: center;
-  gap: 10px;
+  /* gap: 5px; */
   margin: 15px 0;
 }
 
@@ -393,3 +405,28 @@
   }
 }
 
+.modelSelectWrapper .styleSelect, .styleSelect {
+  border: 1px solid #191A23;
+  border-radius: 8px;
+  background: transparent url("data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAiIGhlaWdodD0iMTAiIHZpZXdCb3g9IjAgMCAxMCAxMCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJNMSAzTDUgN0w5IDMiIHN0cm9rZT0iIzE5MUEyMyIgc3Ryb2tlLXdpZHRoPSIxLjUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPjwvc3ZnPg==") no-repeat;
+  background-position: right 12px center;
+  background-size: 12px;
+  color: #191A23;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  /* 기본 브라우저 화살표 제거 (필요시) */
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.modelSelectWrapper .styleSelect:focus, .styleSelect:focus {
+  outline: none;
+  border-color: #191A23;
+}
+
+.modelSelectWrapper .styleSelect option, .styleSelect option {
+  /* background-color: #fff; */
+  color: #191A23;
+  padding: 8px;
+}

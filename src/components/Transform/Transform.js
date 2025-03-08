@@ -32,8 +32,8 @@ function Transform({ histories, setHistories }) {
   ];
 
   const modelOptions = [
-    { value: 'gpt-3.5-turbo', label: 'GPT-3.5 Turbo' },
-    { value: 'gpt-4o-mini', label: 'GPT-4 Mini' },
+    // { value: 'gpt-3.5-turbo', label: 'GPT-3.5 Turbo' },
+    { value: 'gpt-4o-mini', label: 'GPT-4' }, // UI에는 GPT-4로 표시
     { value: 'gemini', label: 'Gemini' }
   ];
 
@@ -44,7 +44,7 @@ function Transform({ histories, setHistories }) {
     { value: 'qwen15b', label: 'Qwen2.5 1.5B' },
     { value: 'qwen3b', label: 'Qwen2.5 3B' },
     { value: 'qwen7b', label: 'Qwen2.5 7B' },
-    { value: 'bllossom', label: 'Llama Korean Bllossom 3B' },
+    { value: 'bllossom', label: 'Llama Korean 3B' },
     { value: 'heegyu', label: 'Heegyu Model' },
     { value: 'formal-9unu', label: 'Formal 9UNU' },
     { value: 'gentle-9unu', label: 'Gentle 9UNU' }
@@ -98,7 +98,7 @@ function Transform({ histories, setHistories }) {
     try {
       const requestData = {
         message: inputText,
-        style: document.querySelector(`.${styles.styleSelect}`).value,
+        style: selectedStyle, // 상태 변수 사용
         model: modelType.startsWith('gpt') ? 'openai-gpt' : modelType,
         subModel: modelType.startsWith('gpt') ? modelType : undefined
       };
@@ -204,19 +204,19 @@ function Transform({ histories, setHistories }) {
       <div className={styles.transformBox}>
         <div className={styles.leftSection}>
           <div className={styles.headerSection}>
-            <h3></h3>
+            <h3>원문</h3>
             <button 
               className={styles.historyButton}
               onClick={() => setShowHistory(true)}
             >
               <FontAwesomeIcon icon={faHistory} />
-              <span>변환 기록</span>
+              <span>기록</span>
             </button>
           </div>
           <div className={styles.inputWrapper}>
             <textarea 
               className={styles.inputArea} 
-              placeholder="변환할 문장을 입력해주세요"
+              placeholder="문장을 입력해주세요"
               value={inputText}
               onChange={(e) => setInputText(e.target.value)}
             />
@@ -235,7 +235,38 @@ function Transform({ histories, setHistories }) {
           </button>
         </div>
         <div className={styles.rightSection}>
-        <div className={styles.selectWrapper}>
+        <div className={styles.selectWrapper}>        
+          <div className={styles.modelSelectWrapper}>
+            <select 
+              className={styles.styleSelect}
+              value={modelOptions.some(opt => opt.value === modelType) ? modelType : ""}
+              onChange={handleModelChange}
+              disabled={localAIOptions.some(opt => opt.value === modelType)}  
+            >
+              <option value="" disabled>클라우드 AI</option>
+              {modelOptions.map(option => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+
+            <select 
+              className={styles.styleSelect}
+              defaultValue=""
+              value={localAIOptions.some(opt => opt.value === modelType) ? modelType : ""}
+              onChange={handleModelChange}
+              disabled={modelOptions.some(opt => opt.value === modelType)} 
+            >
+              <option value="" disabled>로컬 AI</option>
+              {localAIOptions.map(option => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </div>
+
           <select 
             className={styles.styleSelect} 
             defaultValue=""
@@ -249,34 +280,6 @@ function Transform({ histories, setHistories }) {
               </option>
             ))}
           </select>
-          
-          <div className={styles.modelSelectWrapper}>
-            <select 
-              className={styles.styleSelect}
-              value={modelOptions.some(opt => opt.value === modelType) ? modelType : ""}
-              onChange={handleModelChange}
-            >
-              <option value="" disabled>클라우드 AI</option>
-              {modelOptions.map(option => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-
-            <select 
-              className={styles.styleSelect}
-              value={localAIOptions.some(opt => opt.value === modelType) ? modelType : ""}
-              onChange={handleModelChange}
-            >
-              <option value="" disabled>로컬 AI</option>
-              {localAIOptions.map(option => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-          </div>
         </div>
         
         <textarea className={styles.outputArea} value={outputText} readOnly={true}></textarea>
