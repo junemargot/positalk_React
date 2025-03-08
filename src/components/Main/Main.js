@@ -14,7 +14,10 @@ function Main() {
           </h2>
           <p>이쁜말 변환기는 AI 딥러닝 기술을 활용하여 일상에서 사용되는</p>
           <p>거친 표현이나 부정적인 문장을 긍정적인 말로 바꿔주는 서비스입니다.</p>
-          {/* <button className={styles.experienceButton}>체험하러가기</button> */}
+          {/* <p>
+            이쁜말 변환기는 AI 딥러닝 기술을 활용하여 일상에서 사용되는
+            거친 표현이나 부정적인 문장을 긍정적인 말로 바꿔주는 서비스입니다.
+          </p> */}
           <Link to="/transform" className={`${styles.experienceButton} ${styles.linkButton}`}>
             체험하러가기
           </Link>

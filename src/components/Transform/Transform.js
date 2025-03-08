@@ -204,7 +204,7 @@ function Transform({ histories, setHistories }) {
       <div className={styles.transformBox}>
         <div className={styles.leftSection}>
           <div className={styles.headerSection}>
-            <h3>원문</h3>
+            <h3></h3>
             <button 
               className={styles.historyButton}
               onClick={() => setShowHistory(true)}

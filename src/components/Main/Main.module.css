@@ -1,3 +1,13 @@
+@font-face {
+  font-family: 'GmarketSans-Light';
+  src: url('../../fonts/GmarketSansLight.otf') format('opentype');
+}
+
+@font-face {
+  font-family: 'GmarketSans-Medium';
+  src: url('../../fonts/GmarketSansMedium.otf') format('opentype');
+}
+
 .main {
   max-width: 1200px;
   min-height: 100vh;
@@ -26,11 +36,12 @@
 }
 
 .title {
+  font-family: 'GmarketSans-Medium';
   color: #191A23;
   margin-bottom: 1rem;
   font-size: 3.2rem;
   font-weight: 600;
-  line-height: 1.2; /* 줄 간격을 좁힘 */
+  line-height: 1.2;
 }
 
 .main p {
@@ -46,7 +57,7 @@
 .experienceButton {
   display: inline-block;
   margin-top: 3rem;
-  padding: 1.1rem 2.1rem;
+  padding: 0.9rem 2.1rem;
   font-size: 1rem;
   font-weight: 600;
   color: #fff;
@@ -88,5 +99,57 @@
 
   .title {
     font-size: 2.5rem; /* 모바일에서 폰트 크기 조정 */
+  }
+}
+
+@media (max-width: 425px) {
+  .content {
+    flex-direction: column;
+  }
+
+  .textContent, .imageContent {
+    width: 100%;
+    padding-right: 0;
+    text-align: center;
+  }
+
+  .imageContent {
+    margin-top: 2rem;
+    justify-content: center;
+  }
+
+  .title {
+    font-family: 'GmarketSans-Medium';
+    color: #191A23;
+    margin-bottom: 1rem;
+    font-size: 2.4rem;
+    font-weight: 600;
+    line-height: 1.2;
+    word-break: keep-all;
+    overflow-wrap: break-word;
+  }
+
+  .main {
+    padding: 100px 2rem 0;
+  }
+  
+  .main p {
+    font-size: 16px;
+    color: #666;
+    line-height: 1.6;
+    word-break: keep-all;
+    overflow-wrap: break-word;
+    text-align: center;
+    max-width: 90%;
+    margin: 0 auto;
+  }
+
+  .experienceButton {
+    margin-top: 1.5rem;
+  }
+
+  .imageContent {
+    margin-top: 1rem;
+    justify-content: center;
   }
 }

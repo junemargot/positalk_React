@@ -6,11 +6,11 @@
 }
 
 ::selection {
-  background-color: #B9FF66; /* 배경색 */
-  color: #191A23; /* 텍스트 색상 */
+  background-color: #B9FF66;
+  color: #191A23;
 }
 
-/* Firefox 브라우저를 위한 설정 */
+/* Firefox 브라우저 설정 */
 ::-moz-selection {
   background-color: #B9FF66;
   color: #191A23;
@@ -26,7 +26,7 @@ body {
   font-family: 'Pretendard', sans-serif;
   background: #fff;
   line-height: 1.6;
-  padding-bottom: 60px; /* Footer의 높이만큼 여백 추가 */
+  padding-bottom: 60px;
 }
 
 .App {
