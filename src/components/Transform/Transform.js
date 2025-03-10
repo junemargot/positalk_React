@@ -14,14 +14,15 @@ function Transform({ histories, setHistories }) {
   const [isLoading, setIsLoading] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [modelType, setModelType] = useState('');
-  const [selectedModel, setSelectedModel] = useState('');
+  const [selectedCloudModel, setSelectedCloudModel] = useState('');
+  const [selectedLocalModel, setSelectedLocalModel] = useState('');
   const [showHistory, setShowHistory] = useState(false);
   const [displayModel, setDisplayModel] = useState('');
   const [availableStyles, setAvailableStyles] = useState([]);
   const [selectedStyle, setSelectedStyle] = useState('');
 
   useEffect(() => {
-    setSelectedModel('');
+    setAvailableStyles(allStyleOptions);
   }, []);
 
   const allStyleOptions = [
@@ -32,7 +33,6 @@ function Transform({ histories, setHistories }) {
   ];
 
   const modelOptions = [
-    // { value: 'gpt-3.5-turbo', label: 'GPT-3.5 Turbo' },
     { value: 'gpt-4o-mini', label: 'GPT-4' }, // UI에는 GPT-4로 표시
     { value: 'gemini', label: 'Gemini' }
   ];
@@ -50,47 +50,82 @@ function Transform({ histories, setHistories }) {
     { value: 'gentle-9unu', label: 'Gentle 9UNU' }
   ];
 
-  const handleModelChange = (e) => {
-    let newModel = e.target.value;
-    
-    // 9unu 모델들은 'h9'로 변경
-    if (newModel === 'formal-9unu' || newModel === 'gentle-9unu') {
-        newModel = 'h9';
+  const handleCloudModelChange = (e) => {
+    const newModel = e.target.value;
+
+    // 기본 옵션(빈 값) 선택할 경우 - 클라우드 모델 선택 해제
+    if(!newModel) {
+      setSelectedCloudModel('');
+      setModelType('');
+      return;
     }
-    
+
+    // 클라우드 모델 선택시 로컬 모델 선택 초기화
+    setSelectedLocalModel('');
+    setSelectedCloudModel(newModel);
     setModelType(newModel);
-    
-    // 모델에 따른 스타일 옵션 설정
-    if (newModel === 'heegyu') {
-        setAvailableStyles(allStyleOptions.filter(style => 
-            ['casual', 'cute'].includes(style.value)
-        ));
-        setSelectedStyle('casual'); // 기본값 설정
-    } else if (e.target.value === 'gentle-9unu') {
-        setAvailableStyles(allStyleOptions.filter(style => 
-            style.value === 'polite'
-        ));
-        setSelectedStyle('polite'); // 기본값 설정
-    } else if (e.target.value === 'formal-9unu') {
-        setAvailableStyles(allStyleOptions.filter(style => 
-            style.value === 'formal'
-        ));
-        setSelectedStyle('formal'); // 기본값 설정
-    } else {
-        setAvailableStyles(allStyleOptions);
+  
+    // 스타일 옵션 설정 - 클라우드 모델은 모든 스타일 지원
+    setAvailableStyles(allStyleOptions);
+    if(!selectedStyle) setSelectedStyle(allStyleOptions[0].value);
+
+    // 선택된 모델 표시 업데이트
+    const selectedModelOption = modelOptions.find(opt => opt.value === newModel);
+    if(selectedModelOption) {
+      setDisplayModel(selectedModelOption.label);
     }
-    
-    const isCloudAI = modelOptions.some(opt => opt.value === e.target.value);
-    const isLocalAI = localAIOptions.some(opt => opt.value === e.target.value);
-    
-    if (isCloudAI || isLocalAI) {
-        setDisplayModel(modelOptions.find(opt => opt.value === e.target.value)?.label || 
-                     localAIOptions.find(opt => opt.value === e.target.value)?.label || '');
+  };
+
+  const handleLocalModelChange = (e) => {
+    let newModel = e.target.value;
+
+    // 기본 옵션(빈 값)을 선택한 경우 - 로컬 모델 선택 해제
+    if(!newModel) {
+      setSelectedLocalModel('');
+      setModelType('');
+      return;
+    }
+
+    // 로컬 모델 선택 시 클라우드 모델 선택 초기화
+    setSelectedCloudModel('');
+    setSelectedLocalModel(newModel);
+
+    // 9unu 모델들은 'h9'로 변경
+    if(newModel === 'formal-9unu' || newModel === 'gentle-9unu') {
+      newModel = 'h9';
+    }
+
+    setModelType(newModel);
+
+    // 모델에 따른 스타일 옵션 설정
+    if(newModel === 'heegyu') {
+      const filteredStyles = allStyleOptions.filter(style => ['casual', 'cute'].includes(style.value));
+      setAvailableStyles(filteredStyles);
+      setSelectedStyle('casual'); // 기본값 설정
+    }else if(e.target.value === 'gentle-9unu') {
+      const filteredStyles = allStyleOptions.filter(style => style.value === 'polite');
+      setAvailableStyles(filteredStyles);
+      setSelectedStyle('polite'); // 기본값 설정
+    } else if (e.target.value === 'formal-9unu') {
+      const filteredStyles = allStyleOptions.filter(style => 
+        style.value === 'formal'
+      );
+      setAvailableStyles(filteredStyles);
+      setSelectedStyle('formal'); // 기본값 설정
+    } else {
+      setAvailableStyles(allStyleOptions);
+      if (!selectedStyle) setSelectedStyle(allStyleOptions[0].value);
+    }
+
+    // 선택된 모델 표시 업데이트
+    const selectedModelOption = localAIOptions.find(opt => opt.value === e.target.value);
+    if (selectedModelOption) {
+      setDisplayModel(selectedModelOption.label);
     }
   };
 
   const handleTransform = async () => {
-    if (!inputText.trim()) return;
+    if (!inputText.trim() || !modelType) return;
     
     setIsLoading(true);
     const startTime = Date.now();
@@ -210,11 +245,12 @@ function Transform({ histories, setHistories }) {
               <div className={styles.modelSelectWrapper}>
                 {/* 클라우드 AI Select */}
                 <select
-                  className={`${styles.styleSelect} ${localAIOptions.some(opt => opt.value === modelType) ? styles.disabledSelect : ''}`}
-                  value={modelOptions.some(opt => opt.value === modelType) ? modelType : ""}
-                  onChange={handleModelChange}
+                  className={`${styles.styleSelect} ${selectedLocalModel ? styles.disabledSelect : ''}`}
+                  value={selectedCloudModel}
+                  onChange={handleCloudModelChange}
+                  disabled={!!selectedLocalModel}
                 >
-                  <option value="" disabled>클라우드 AI 모델</option>
+                  <option value="">클라우드 AI 모델</option>
                   {modelOptions.map(option => (
                     <option key={option.value} value={option.value}>
                       {option.label}
@@ -224,11 +260,12 @@ function Transform({ histories, setHistories }) {
 
                 {/* 로컬 AI Select */}
                 <select
-                  className={`${styles.styleSelect} ${modelOptions.some(opt => opt.value === modelType) ? styles.disabledSelect : ''}`}
-                  value={localAIOptions.some(opt => opt.value === modelType) ? modelType : ""}
-                  onChange={handleModelChange}
+                  className={`${styles.styleSelect} ${selectedCloudModel ? styles.disabledSelect : ''}`}
+                  value={selectedLocalModel}
+                  onChange={handleLocalModelChange}
+                  disabled={!!selectedCloudModel}
                 >
-                  <option value="" disabled>로컬 AI 모델</option>
+                  <option value="">로컬 AI 모델</option>
                   {localAIOptions.map(option => (
                     <option key={option.value} value={option.value}>
                       {option.label}
@@ -242,6 +279,7 @@ function Transform({ histories, setHistories }) {
                 className={styles.styleSelect}
                 value={selectedStyle}
                 onChange={(e) => setSelectedStyle(e.target.value)}
+                disabled={!modelType}
               >
                 <option value="" disabled>문체</option>
                 {availableStyles.map(option => (
