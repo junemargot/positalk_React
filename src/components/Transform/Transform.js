@@ -21,9 +21,19 @@ function Transform({ histories, setHistories }) {
   const [availableStyles, setAvailableStyles] = useState([]);
   const [selectedStyle, setSelectedStyle] = useState('');
 
+  // 유효성 검사 오류 메세지 상태
+  const [validationError, setValidationError] = useState('');
+  const [isSubmitted, setIsSubmitted] = useState(false);
+
   useEffect(() => {
     setAvailableStyles(allStyleOptions);
   }, []);
+
+  useEffect(() => {
+    if (isSubmitted) {
+      validateForm(); // 유효성 검사 갱신
+    }
+  }, [inputText, modelType, selectedStyle]);
 
   const allStyleOptions = [
     { value: 'formal', label: '격식체' },
@@ -57,6 +67,7 @@ function Transform({ histories, setHistories }) {
     if(!newModel) {
       setSelectedCloudModel('');
       setModelType('');
+      setValidationError('');
       return;
     }
 
@@ -83,6 +94,7 @@ function Transform({ histories, setHistories }) {
     if(!newModel) {
       setSelectedLocalModel('');
       setModelType('');
+      setValidationError('');
       return;
     }
 
@@ -101,21 +113,32 @@ function Transform({ histories, setHistories }) {
     if(newModel === 'heegyu') {
       const filteredStyles = allStyleOptions.filter(style => ['casual', 'cute'].includes(style.value));
       setAvailableStyles(filteredStyles);
-      setSelectedStyle('casual'); // 기본값 설정
-    }else if(e.target.value === 'gentle-9unu') {
-      const filteredStyles = allStyleOptions.filter(style => style.value === 'polite');
+      setSelectedStyle(''); // 모델 선택 시 문체 선택 유도하기 위해 기본값 설정하지 않음
+
+    } else if (e.target.value === 'gentle-9unu') {
+      const filteredStyles = allStyleOptions.filter(style => 
+        style.value === 'polite'
+      );
       setAvailableStyles(filteredStyles);
-      setSelectedStyle('polite'); // 기본값 설정
+      // 단일 옵션만 있는 경우는 자동 선택
+      setSelectedStyle('polite');
+
     } else if (e.target.value === 'formal-9unu') {
       const filteredStyles = allStyleOptions.filter(style => 
         style.value === 'formal'
       );
       setAvailableStyles(filteredStyles);
-      setSelectedStyle('formal'); // 기본값 설정
+      // 단일 옵션만 있는 경우는 자동 선택
+      setSelectedStyle('formal');
+
     } else {
       setAvailableStyles(allStyleOptions);
-      if (!selectedStyle) setSelectedStyle(allStyleOptions[0].value);
+      // 모델 선택 시 문체 선택을 유도하기 위해 기본값 설정하지 않음
+      setSelectedStyle('');
     }
+
+    // 유효성 오류 메세지 초기화
+    setValidationError('');
 
     // 선택된 모델 표시 업데이트
     const selectedModelOption = localAIOptions.find(opt => opt.value === e.target.value);
@@ -124,21 +147,44 @@ function Transform({ histories, setHistories }) {
     }
   };
 
+  const validateForm = () => {
+    let errorMessage = ""; // 여러 오류 감지하기 위한 변수
+
+    if (!inputText.trim()) {
+      console.log("텍스트가 입력되지 않음");
+      errorMessage = "변환할 텍스트를 입력해주세요.";
+    } else if (!modelType) {
+      console.log("모델이 선택되지 않음");
+      errorMessage = "변환할 모델을 선택해주세요.";
+    } else if (!selectedStyle) {
+      console.log("문체가 선택되지 않음");
+      errorMessage = "문체를 선택해주세요.";
+    }
+
+    setValidationError(errorMessage);  // 최종적으로 한 번만 상태 업데이트
+    return !errorMessage;
+  }
+
   const handleTransform = async () => {
-    if (!inputText.trim() || !modelType) return;
-    
+    setIsSubmitted(true); // 버튼 클릭 시 상태 변경
+    if (!validateForm()) {
+      console.log("유효성 검증 실패");
+      return;
+    }
+  
+    console.log("유효성 검증 통과, 변환 요청 시작");
     setIsLoading(true);
     const startTime = Date.now();
-    
+  
     try {
       const requestData = {
         message: inputText,
-        style: selectedStyle, // 상태 변수 사용
+        style: selectedStyle,
         model: modelType.startsWith('gpt') ? 'openai-gpt' : modelType,
         subModel: modelType.startsWith('gpt') ? modelType : undefined
       };
       console.log('요청 데이터:', requestData);
-
+  
       const response = await axios.post('http://localhost:8000/api/chat', requestData);
       
       const duration = Date.now() - startTime;
@@ -146,11 +192,11 @@ function Transform({ histories, setHistories }) {
         inputText,
         outputText: response.data.response,
         model: modelType,
-        style: document.querySelector(`.${styles.styleSelect}`).value,
+        style: selectedStyle,
         timestamp: new Date().toLocaleString(),
         duration
       };
-      
+  
       setHistories(prev => [newHistory, ...prev]);
       setOutputText(response.data.response);
     } catch (error) {
@@ -245,7 +291,9 @@ function Transform({ histories, setHistories }) {
               <div className={styles.modelSelectWrapper}>
                 {/* 클라우드 AI Select */}
                 <select
-                  className={`${styles.styleSelect} ${selectedLocalModel ? styles.disabledSelect : ''}`}
+                  className={`${styles.styleSelect} 
+                    ${selectedLocalModel ? styles.disabledSelect : ''} 
+                    ${selectedCloudModel ? styles.activeSelect : ''}`}
                   value={selectedCloudModel}
                   onChange={handleCloudModelChange}
                   disabled={!!selectedLocalModel}
@@ -260,7 +308,9 @@ function Transform({ histories, setHistories }) {
 
                 {/* 로컬 AI Select */}
                 <select
-                  className={`${styles.styleSelect} ${selectedCloudModel ? styles.disabledSelect : ''}`}
+                  className={`${styles.styleSelect} 
+                    ${selectedCloudModel ? styles.disabledSelect : ''} 
+                    ${selectedLocalModel ? styles.activeSelect : ''}`}
                   value={selectedLocalModel}
                   onChange={handleLocalModelChange}
                   disabled={!!selectedCloudModel}
@@ -276,12 +326,13 @@ function Transform({ histories, setHistories }) {
 
               {/* 문체 Select */}
               <select
-                className={styles.styleSelect}
+                className={`${styles.styleSelect} 
+                  ${selectedStyle ? styles.activeSelect : ''}`}
                 value={selectedStyle}
                 onChange={(e) => setSelectedStyle(e.target.value)}
                 disabled={!modelType}
               >
-                <option value="" disabled>문체</option>
+                <option value="" disabled>문체 선택</option>
                 {availableStyles.map(option => (
                   <option key={option.value} value={option.value}>
                     {option.label}
@@ -295,7 +346,7 @@ function Transform({ histories, setHistories }) {
             {/* textarea 본문 입력 */}
             <textarea
               className={styles.inputArea}
-              placeholder="문장을 입력해주세요"
+              placeholder="변환할 텍스트를 입력해주세요"
               value={inputText}
               onChange={(e) => setInputText(e.target.value)}
             />
@@ -305,11 +356,18 @@ function Transform({ histories, setHistories }) {
               </button>
             )}
           </div>
+
+          {/* 유효성 검사 오류 메시지 표시 */}
+          {isSubmitted && validationError && (
+            <div className={styles.validationError}>
+              {validationError}
+            </div>
+          )}
           
           <button 
             className={styles.transformButton} 
             onClick={handleTransform} 
-            disabled={isLoading || !inputText.trim()}
+            disabled={isLoading || validationError}
           >
             {isLoading ? '변환 중..' : '변환하기'}
           </button>
