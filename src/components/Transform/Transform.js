@@ -205,17 +205,58 @@ function Transform({ histories, setHistories }) {
         <div className={styles.leftSection}>
           <div className={styles.headerSection}>
             <h3>원문</h3>
-            <button 
-              className={styles.historyButton}
-              onClick={() => setShowHistory(true)}
-            >
-              <FontAwesomeIcon icon={faHistory} />
-              <span>기록</span>
-            </button>
+            {/* --- 클라우드 AI, 로컬 AI, 문체 선택 영역 --- */}
+            <div className={styles.selectWrapper}>
+              <div className={styles.modelSelectWrapper}>
+                {/* 클라우드 AI Select */}
+                <select
+                  className={`${styles.styleSelect} ${localAIOptions.some(opt => opt.value === modelType) ? styles.disabledSelect : ''}`}
+                  value={modelOptions.some(opt => opt.value === modelType) ? modelType : ""}
+                  onChange={handleModelChange}
+                >
+                  <option value="" disabled>클라우드 AI 모델</option>
+                  {modelOptions.map(option => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+
+                {/* 로컬 AI Select */}
+                <select
+                  className={`${styles.styleSelect} ${modelOptions.some(opt => opt.value === modelType) ? styles.disabledSelect : ''}`}
+                  value={localAIOptions.some(opt => opt.value === modelType) ? modelType : ""}
+                  onChange={handleModelChange}
+                >
+                  <option value="" disabled>로컬 AI 모델</option>
+                  {localAIOptions.map(option => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* 문체 Select */}
+              <select
+                className={styles.styleSelect}
+                value={selectedStyle}
+                onChange={(e) => setSelectedStyle(e.target.value)}
+              >
+                <option value="" disabled>문체</option>
+                {availableStyles.map(option => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
+
           <div className={styles.inputWrapper}>
-            <textarea 
-              className={styles.inputArea} 
+            {/* textarea 본문 입력 */}
+            <textarea
+              className={styles.inputArea}
               placeholder="문장을 입력해주세요"
               value={inputText}
               onChange={(e) => setInputText(e.target.value)}
@@ -226,6 +267,7 @@ function Transform({ histories, setHistories }) {
               </button>
             )}
           </div>
+          
           <button 
             className={styles.transformButton} 
             onClick={handleTransform} 
@@ -235,71 +277,38 @@ function Transform({ histories, setHistories }) {
           </button>
         </div>
         <div className={styles.rightSection}>
-        <div className={styles.selectWrapper}>        
-          <div className={styles.modelSelectWrapper}>
-            <select 
-              className={styles.styleSelect}
-              value={modelOptions.some(opt => opt.value === modelType) ? modelType : ""}
-              onChange={handleModelChange}
-              disabled={localAIOptions.some(opt => opt.value === modelType)}  
+          <div className={styles.headerSection}>
+            <h3>변환문</h3>        
+            {/* <button 
+              className={styles.historyButton}
+              onClick={() => setShowHistory(true)}
             >
-              <option value="" disabled>클라우드 AI</option>
-              {modelOptions.map(option => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-
-            <select 
-              className={styles.styleSelect}
-              defaultValue=""
-              value={localAIOptions.some(opt => opt.value === modelType) ? modelType : ""}
-              onChange={handleModelChange}
-              disabled={modelOptions.some(opt => opt.value === modelType)} 
-            >
-              <option value="" disabled>로컬 AI</option>
-              {localAIOptions.map(option => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
+              <FontAwesomeIcon icon={faHistory} />
+              <span>기록</span>
+            </button> */}
           </div>
-
-          <select 
-            className={styles.styleSelect} 
-            defaultValue=""
-            value={selectedStyle}
-            onChange={(e) => setSelectedStyle(e.target.value)}
-          >
-            <option value="" disabled>문체</option>
-            {availableStyles.map(option => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
-        </div>
-        
-        <textarea className={styles.outputArea} value={outputText} readOnly={true}></textarea>
-        <div className={styles.buttonGroup}>
-          <button title="사운드 재생" className={styles.soundButton} onClick={handlePlaySound} disabled={!outputText || isPlaying}>
-            <FontAwesomeIcon icon={faVolumeHigh} />
-            <span className={styles.srOnly}>
-              {isPlaying ? '재생 중..' : '소리 재생'}
-            </span>
-          </button>
-          <div className={styles.copyButtonWrapper}>
-            <button title="클립보드 복사" className={styles.copyButton} onClick={() => handleCopy(outputText)} disabled={!outputText}>
-              <FontAwesomeIcon icon={faCopy} />
-              <span className={styles.srOnly}>복사하기</span>
+          <textarea className={styles.outputArea} value={outputText} readOnly={true}></textarea>
+          <div className={styles.buttonGroup}>
+            <button title="기록 보기" className={styles.iconButton} onClick={() => setShowHistory(true)}>
+              <FontAwesomeIcon icon={faHistory} />
+              <span className={styles.srOnly}>기록</span>
             </button>
-            {showCopyMessage && (
-              <div className={styles.copyMessage}>복사되었습니다</div>
-            )}
+            <button title="사운드 재생" className={styles.iconButton} onClick={handlePlaySound} disabled={!outputText || isPlaying}>
+              <FontAwesomeIcon icon={faVolumeHigh} />
+              <span className={styles.srOnly}>
+                {isPlaying ? '재생 중..' : '소리 재생'}
+              </span>
+            </button>
+            <div className={styles.copyButtonWrapper}>
+              <button title="클립보드 복사" className={styles.iconButton} onClick={() => handleCopy(outputText)} disabled={!outputText}>
+                <FontAwesomeIcon icon={faCopy} />
+                <span className={styles.srOnly}>복사하기</span>
+              </button>
+              {showCopyMessage && (
+                <div className={styles.copyMessage}>복사되었습니다</div>
+              )}
+            </div>
           </div>
-        </div>
         </div>
       </div>
       {showHistory && (
