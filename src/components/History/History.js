@@ -36,42 +36,48 @@ function History({ histories, onSpeak, onCopy, onClose }) {
           </button>
         </div>
         <div className={styles.historyList}>
-          {histories.map((history, index) => (
-            <div key={index} className={styles.historyItem}>
-              <div className={styles.historyHeader}>
-                <span className={styles.timestamp}>{history.timestamp}</span>
-                <span className={styles.model}>{history.model}</span>
-                <span className={`${styles.style} ${styleClasses[history.style]}`}>
-                  {styleLabels[history.style]}
-                </span>
-                <span className={styles.duration}>{history.duration}ms</span>
-              </div>
-              <div className={styles.textContent}>
-                <div className={styles.inputText}>
-                  <label>원문:</label>
-                  <p>{history.inputText}</p>
+          {histories.length > 0 ? (
+            histories.map((history, index) => (
+              <div key={index} className={styles.historyItem}>
+                <div className={styles.historyHeader}>
+                  <span className={styles.timestamp}>{history.timestamp}</span>
+                  <span className={styles.model}>{history.model}</span>
+                  <span className={`${styles.style} ${styleClasses[history.style]}`}>
+                    {styleLabels[history.style]}
+                  </span>
+                  <span className={styles.duration}>{history.duration}ms</span>
                 </div>
-                <div className={styles.outputText}>
-                  <label>변환문:</label>
-                  <p>{history.outputText}</p>
+                <div className={styles.textContent}>
+                  <div className={styles.inputText}>
+                    <label>원문:</label>
+                    <p>{history.inputText}</p>
+                  </div>
+                  <div className={styles.outputText}>
+                    <label>변환문:</label>
+                    <p>{history.outputText}</p>
+                  </div>
+                </div>
+                <div className={styles.actions}>
+                  <button 
+                    className={styles.actionButton} 
+                    onClick={() => onSpeak(history.outputText, history.style)}
+                  >
+                    <FontAwesomeIcon icon={faVolumeHigh} />
+                  </button>
+                  <button 
+                    className={styles.actionButton} 
+                    onClick={() => onCopy(history.outputText)}
+                  >
+                    <FontAwesomeIcon icon={faCopy} />
+                  </button>
                 </div>
               </div>
-              <div className={styles.actions}>
-                <button 
-                  className={styles.actionButton} 
-                  onClick={() => onSpeak(history.outputText, history.style)}
-                >
-                  <FontAwesomeIcon icon={faVolumeHigh} />
-                </button>
-                <button 
-                  className={styles.actionButton} 
-                  onClick={() => onCopy(history.outputText)}
-                >
-                  <FontAwesomeIcon icon={faCopy} />
-                </button>
-              </div>
+          ))
+          ) : (
+            <div className={styles.noHistoryMessage}>
+              저장된 변환 기록이 없습니다.
             </div>
-          ))}
+        )}
         </div>
       </div>
     </div>
