@@ -1,6 +1,6 @@
 import React from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCopy, faVolumeHigh, faXmark } from '@fortawesome/free-solid-svg-icons';
+import { faCopy, faHistory, faVolumeHigh, faXmark } from '@fortawesome/free-solid-svg-icons';
 import styles from './History.module.css';
 
 function History({ histories, onSpeak, onCopy, onClose }) {
@@ -24,7 +24,10 @@ function History({ histories, onSpeak, onCopy, onClose }) {
     <div className={styles.modalOverlay}>
       <div className={styles.modalContent}>
         <div className={styles.modalHeader}>
-          <h2>변환 기록</h2>
+          <h2>
+            <FontAwesomeIcon icon={faHistory} className={styles.historyIcon} /> 
+            변환 기록
+          </h2>
           <button 
             className={styles.closeButton}
             onClick={onClose}
